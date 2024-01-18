@@ -59,8 +59,3 @@ This tutorial encompasses all aspects of heavy lifting in production-level appli
 
 - Simple Chat Room Application
   - Send/Receive text messages in chat room
-
-### Well Documented Code and Detailed Explanations
-
-This tutorial is accompanied by detailed explanations and comments in the code.
-It is designed to be beginner-friendly, and you should be able to follow along if you have knowledge of HTML, CSS, and JavaScript.
