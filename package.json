@@ -1,0 +1,14 @@
+{
+  "name": "skapi-tutorial",
+  "version": "1.0.0",
+  "description": "This tutorial will show you how to build full scale application with Skapi.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node node_modules/basic-node-server/bns"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "basic-node-server": "^1.0.6"
+  }
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
+<script src="../service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="../custom.css">
+
+<script>
+    checkProfile({
+        kickRoute: '../index.html',
+        kickUser: 'unsigned'
+    });
+</script>
+
+<main id="main_page">
+    <form action='../index.html' onsubmit="
+        disableForm(this, true);
+        skapi.disableAccount(event).then(()=>alert('Your account is removed.')).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));
+    ">
+        <div class="spaceBetween">
+            <h2>Remove Account</h2>
+            <a href="update-profile.html">Back</a>
+        </div>
+        <hr>
+        <h3>Would you like to remove your account?</h3>
+        <p>
+            Once you remove your account, your account will still be recoverable within 6 months by logging in again and
+            verifing your email address.
+            <br>
+            After 6 months, all your data will be deleted and cannot be recovered.
+        </p>
+        <p><strong>Note: </strong>Your account cannot be recovered if you have not verified your email address.</p>
+        <p>If you would like to proceed, please click the button below.</p>
+        <br>
+        <div id="div_singleInput">
+            <input type="submit" value="Remove Account">
+            <style>
+                #div_singleInput {
+                    text-align: center;
+                }
+            </style>
+        </div>
+    </form>
+</main>

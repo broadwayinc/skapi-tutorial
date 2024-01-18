@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
+<script src="service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="custom.css">
+
+<dialog id="dialog_login">
+    <h2>Login</h2>
+    <form onsubmit="
+            disableForm(this, true);
+            skapi.login(event).then(main).catch(async err=>{
+                if(err.code === 'USER_IS_DISABLED') {
+                    let recover = confirm('Your account is disabled. Would you like to recover your account?');
+                    if(recover) {
+                        await skapi.recoverAccount();
+                        location.href = 'authentication/recover-account.html';
+                        return;
+                    }
+                }
+                else {
+                    alert(err.message);
+                }
+            }).finally(()=>disableForm(this, false));
+    ">
+        <table>
+            <tr>
+                <td>Email</td>
+                <td>
+                    <input type='email' name="email" placeholder='your@email.com' required autocomplete="email">
+                </td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td>
+                    <input type="password" name="password" placeholder='Your Password' required autocomplete="off">
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td id="td_forgotPassword">
+                    <a href="authentication/forgot-password.html">
+                        <small>Forgot Password?</small>
+                    </a>
+                    <style>
+                        #td_forgotPassword {
+                            text-align: right;
+                        }
+                    </style>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <div class="alignRight">
+            <a href="authentication/create-account.html">
+                <small>Create Account</small>
+            </a>
+            <input type="submit" value="Login">
+            <style>
+                .alignRight>a {
+                    display: inline-block;
+                }
+
+                .alignRight>input {
+                    margin-left: 1rem;
+                }
+
+                .alignRight>small {
+                    display: block;
+                    color: crimson;
+                }
+            </style>
+        </div>
+    </form>
+</dialog>
+<main id="main_page">
+    <section id="section_userPage">
+        <style>
+            #section_userPage {
+                display: none;
+            }
+        </style>
+        <a class='imgLink' href="authentication/profile-pic.html">
+            <img src="" id="img_profilePic" class="profilePic">
+        </a>
+        <style>
+            a.imgLink {
+                text-decoration: none;
+            }
+        </style>
+
+        You're Logged In
+        <h1 id="h1_helloText"></h1>
+        <h3 id="h3_yourEmail"></h3>
+        <h3 id="h3_birthdayReminder"></h3>
+    </section>
+
+    <nav>
+        <style>
+            nav {
+                text-align: right;
+            }
+        </style>
+        <div>
+            <a href="instaclone/instaclone.html">Instaclone</a>
+            |
+            <a href="chatroom/chatroom.html">Chat Room</a>
+            |
+            <a href="authentication/update-profile.html">Update Profile</a>
+        </div>
+        <br>
+        <button onclick="skapi.logout().then(main)">Logout</button>
+    </nav>
+</main>
+<script>
+    let main = () => checkProfile().then(u => {
+        if (u) {
+            section_userPage.style.display = 'block';
+            h1_helloText.textContent = (u.name || u.email) ? `Hello "${u.name || u.email}"!` : '';
+            h3_yourEmail.textContent = `Your login email is ${u.email || 'unknown'}`;
+            h3_birthdayReminder.textContent = u.birthdate ? `And you were born in ${new Date(u.birthdate).toDateString()}!` : '';
+            img_profilePic.src = u.picture || '';
+            dialog_login.close();
+        }
+        else {
+            section_userPage.style.display = 'none';
+            dialog_login.showModal();
+        }
+
+        return u;
+    });
+    main();
+</script>

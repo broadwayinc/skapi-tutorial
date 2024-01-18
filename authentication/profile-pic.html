@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
+<script src="../service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="../custom.css">
+
+<main id="main_page">
+    <form onsubmit="
+        disableForm(this, true);
+        updateProfilePic(event).finally(()=>disableForm(this, false));
+    ">
+        <style>
+            form {
+                text-align: center;
+            }
+        </style>
+        <div class="spaceBetween">
+            <h2>Profile Pic</h2>
+            <a id="a_backLink" href="javascript:history.back()">Back</a>
+        </div>
+        <hr>
+        <label for='input_fileInput' class="clickable">
+            <img id='img_preview' src="">
+            <br>
+            <style>
+                img {
+                    width: 100%;
+                    object-fit: cover;
+                    vertical-align: middle;
+                    position: relative;
+                }
+
+                img[src=""]::before {
+                    content: 'Choose Image';
+                    margin-top: 1em;
+                    padding: 8px;
+                    background-color: blue;
+                    display: block;
+                    color: white;
+                    font-weight: bold;
+                }
+            </style>
+        </label>
+        <br>
+        <br>
+        <input id='input_fileInput' type="file" name="pic" accept="image/*" hidden required>
+        <input type="submit" value="Update">
+        <style>
+            #input_fileInput:invalid+input[type=submit] {
+                pointer-events: none;
+                opacity: 0.5;
+            }
+        </style>
+        <script>
+            input_fileInput.onchange = function () {
+                let file = this.files[0];
+                if (!file) {
+                    return;
+                }
+
+                let reader = new FileReader();
+                reader.onload = function () {
+                    img_preview.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            };
+        </script>
+    </form>
+</main>
+
+<script>
+    let user;
+    checkProfile({
+        kickRoute: '../index.html',
+        kickUser: 'unsigned'
+    }).then(u => {
+        img_preview.src = u.picture || "";
+        user = u;
+    });
+
+    async function updateProfilePic(event) {
+        a_backLink.textContent = `0%`;
+
+        let recordParams = {
+            record_id: user.picture ? user.picture.split('/records/')[1].split('/')[0] : null,
+            table: 'profile_pic',
+            progress: (p) => {
+                if (p.status === 'upload' && p.currentFile) {
+                    a_backLink.textContent = `${Math.floor(p.progress)}%`;
+                }
+            }
+        }
+
+        if (user.picture) {
+            recordParams.remove_bin = [user.picture];
+        }
+
+        try {
+            let record = await skapi.postRecord(event, recordParams);
+            await skapi.updateProfile({picture: record.bin.pic.slice(-1)[0].url});
+            location.href = '../index.html';
+        }
+        catch (err) {
+            alert(err.message);
+        }
+
+        a_backLink.textContent = 'Back';
+    }
+</script>

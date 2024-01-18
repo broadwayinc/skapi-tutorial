@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
+<script src="../service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="../custom.css">
+
+<script>
+    checkProfile({
+        kickRoute: '../index.html',
+        kickUser: 'unsigned'
+    }).then(user => {
+        if (user.email_verified) {
+            location.href = 'update-profile.html';
+        }
+    });
+</script>
+
+<main id="main_page">
+    <form action='update-profile.html' onsubmit="
+        disableForm(this, true);
+        skapi.verifyEmail(event).then(r=>alert('Your email is verified.')).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));
+    ">
+        <div class="spaceBetween">
+            <h2>Email Verification</h2>
+            <a href="update-profile.html">Back</a>
+        </div>
+        <hr>
+        <p>
+            Please check your email for the verification code.
+            <br>
+            Enter the received code below and click verify.
+        </p>
+        <br>
+        <div id="div_singleInput">
+            <input type="text" name="code" placeholder="6 digits code">
+            <input type="submit" value="Verify">
+            <style>
+                #div_singleInput {
+                    text-align: center;
+                }
+
+                input {
+                    margin: 4px 0;
+                }
+            </style>
+        </div>
+        <br>
+        <br>
+        If you have not received the code,
+        <br>
+        please check your spam folder.
+        <br>
+        <br>
+        <span>
+            Or click <ins class='clickable' onclick="
+                let userConfirm = confirm(`We will send a verification email to ${user.email}. Continue?`);
+                if (userConfirm) {
+                    skapi.verifyEmail()
+                        .then(()=>this.parentElement.innerHTML = 'Verification email has been sent.')
+                        .catch(err=>alert(err.message));
+                }
+            ">HERE</ins> to resend.
+        </span>
+    </form>
+</main>

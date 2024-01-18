@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
+<script src="../service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="../custom.css">
+<script>
+    let user = checkProfile({
+        kickRoute: '../index.html',
+        kickUser: 'unsigned'
+    });
+</script>
+<main>
+    <div>
+        <div class="spaceBetween">
+            <h2>Chat Room</h2>
+            <a href="../index.html">Back</a>
+        </div>
+        <section id="chatSection">
+            <div id="chat"></div>
+            <form onsubmit="skapi.postRealtime(event, 'chat').then(()=>this.reset())">
+                <input id='inputMsg' type="text" name='msg' placeholder="Say something" disabled>
+                <input id='sendMsg' type="submit" value="Send" disabled>
+            </form>
+        </section>
+    </div>
+</main>
+<script>
+    let userInfo = {};
+    function getUserInfo(user_id) {
+        if (!userInfo[user_id]) {
+            userInfo[user_id] = skapi.getUsers({
+                searchFor: 'user_id',
+                value: user_id
+            }).then(user => {
+                if (user.list.length === 0) {
+                    return {
+                        email: 'User not found',
+                        name: 'User not found',
+                        picture: ''
+                    };
+                }
+                else {
+                    return user.list[0];
+                }
+            });
+        }
+
+        return userInfo[user_id];
+    }
+
+    let rtCallback = async (rt) => {
+        console.log(rt);
+
+        if (rt.status === 'notice' && rt.message.includes('joined the message group.')) {
+            return getUserInfo(rt.sender).then(async u => {
+                let html = /*html*/ `
+                    <div class='alignCenter'>-- ${u.name || u.email} has joined the chat --</div>
+                `;
+                let div = document.createElement('div');
+                div.innerHTML = html;
+                chat.append(div);
+                chat.scrollTop = chat.scrollHeight;
+            });
+        }
+
+        if (rt.status === 'message') {
+            let sender = await getUserInfo(rt.sender);
+            let html = /*html*/ `
+                <span class='inlineBlock'>
+                    <img src="${sender.picture}" class="profilePic">
+                    <b>${sender.name || sender.email}</b>
+                </span>
+                <br>
+                <span class='inlineBlock'>${rt.message.msg}</span>
+            `;
+            let div = document.createElement('div');
+            div.innerHTML = html;
+            div.classList.add('msg');
+
+            let me = await user;
+            if (rt.sender === me.user_id) {
+                div.classList.add('alignRight');
+            }
+            chat.append(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+    }
+
+    skapi.connectRealtime(rtCallback);
+    skapi.joinRealtime({group: 'chat'}).then(() => {
+        inputMsg.disabled = false;
+        sendMsg.disabled = false;
+    });
+</script>
+<style>
+    main {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        box-sizing: border-box;
+    }
+
+    main>div {
+        display: inline-block;
+        text-align: left;
+        width: 600px;
+        max-width: 100%;
+    }
+
+    #chatSection {
+        display: inline-block;
+        width: 100%;
+    }
+
+    #chat {
+        height: 60vh;
+        padding: 8px;
+        overflow-y: scroll;
+        background-color: white;
+    }
+
+    form {
+        display: flex;
+    }
+
+    input[type="text"] {
+        width: 100%;
+    }
+
+    .msg>* {
+        text-align: left;
+    }
+</style>

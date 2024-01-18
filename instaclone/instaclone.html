@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
+<script src="../service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="../custom.css">
+<script>
+    let user = checkProfile({
+        kickRoute: '../index.html',
+        kickUser: 'unsigned'
+    });
+</script>
+<main id="main_page">
+    <div class="spaceBetween">
+        <h2>Instaclone</h2>
+        <a href="../index.html">Back</a>
+    </div>
+    <section id="uploadSection">
+        <form onsubmit="
+            disableForm(this, true);
+            updateButton.value = '0%';
+
+            let params = {
+                table: {
+                    name: 'posts',
+                    access_group: input_private.checked ? 'private' : 'authorized'
+                },
+                reference: {
+                    allow_multiple_reference: false
+                },
+                progress: p => {
+                    if (p.status === 'upload' && p.currentFile) {
+                        updateButton.value = `${Math.floor(p.progress)}%`;
+                    }
+                },
+                tags: input_tags.value || null
+            }
+
+            skapi.postRecord(event, params).then(async r=>{
+                section_posts.prepend(await createArticleContent(r));
+                img_preview.src = '';
+                this.reset();
+            }).catch(err=>alert(err.message)).finally(()=>{
+                updateButton.value = 'Update';
+                disableForm(this, false);
+            });
+        ">
+            <fieldset>
+                <legend>Upload Post</legend>
+                <br>
+                <label for='input_fileInput' class="clickable">
+                    <img id='img_preview' src="">
+                    <style>
+                        #img_preview {
+                            width: 100%;
+                            object-fit: cover;
+                            vertical-align: middle;
+                            position: relative;
+                        }
+
+                        #img_preview[src=""]::before {
+                            content: 'Choose Image';
+                            padding: 8px;
+                            background-color: blue;
+                            display: block;
+                            color: white;
+                            font-weight: bold;
+                        }
+                    </style>
+                </label>
+
+                <br><br>
+
+                <small>Description</small><br>
+                <input name="description" placeholder="Describe the picture (required)." required></input>
+
+                <br><br>
+
+                <small>Tags</small><br>
+                <input id='input_tags' pattern="[a-zA-Z0-9 ,]+"
+                    title="Only alphanumeric characters, spaces, and commas are allowed"
+                    placeholder="separate with a comma. ex: tag1, tag2 (optional)"></input>
+
+                <br><br>
+
+                <label>
+                    Make This Post Private: <input id="input_private" type="checkbox" name="private" value="private">
+                </label>
+
+                <br><br>
+
+                <input id='input_fileInput' type="file" name="pic" accept="image/*" hidden required>
+                <div class="alignRight">
+                    <input id='updateButton' type="submit" value="Update">
+                </div>
+                <style>
+                    #input_fileInput:invalid+div>input[type=submit] {
+                        pointer-events: none;
+                        opacity: 0.5;
+                    }
+                </style>
+                <script>
+                    input_fileInput.onchange = function () {
+                        let file = this.files[0];
+                        if (!file) {
+                            img_preview.src = '';
+                            return;
+                        }
+
+                        let reader = new FileReader();
+                        reader.onload = function () {
+                            img_preview.src = reader.result;
+                        };
+                        reader.readAsDataURL(file);
+                    };
+                </script>
+            </fieldset>
+        </form>
+    </section>
+
+    <nav class="alignRight">
+        <style>
+            nav>a {
+                margin: 4px 0;
+                display: inline-block;
+            }
+        </style>
+        <a href="instaclone.html">Most Recent</a>
+        |
+        <a href="#mostliked">Most Liked</a>
+        |
+        <a href="#mostcomment">Most Comment</a>
+        |
+        <a href="#myposts">My Posts</a>
+        |
+        <a href="#myprivate">My Private</a>
+    </nav>
+    <hr>
+    <section id="section_posts"></section>
+    <br>
+    <div class="alignCenter">
+        <button id="fetchMore" disabled>Fetch More</button>
+    </div>
+    <style>
+        #section_posts:empty::before {
+            content: 'Fetching posts...';
+            display: block;
+        }
+
+        article>img {
+            width: 100%;
+        }
+
+        article .like[data-like='Liked!'] {
+            color: red;
+        }
+
+        article .like::before {
+            content: attr(data-like);
+        }
+
+        .content {
+            text-indent: 0.25em;
+        }
+
+        input:not([type=checkbox]):not([type=submit]) {
+            width: 100%;
+        }
+    </style>
+</main>
+<script>
+    let fetchQuery = {
+        table: {
+            name: 'posts',
+            access_group: 'authorized'
+        }
+    };
+
+    let likeId = {};
+    let userInfo = {};
+
+    async function getPosts(fetchMore = true) {
+        document.getElementById('fetchMore').disabled = true;
+
+        let posts = await skapi.getRecords(fetchQuery, {ascending: false, limit: 4, fetchMore});
+
+        if (!fetchMore) {
+            section_posts.innerHTML = '';
+            if (posts.list.length === 0) {
+                section_posts.innerHTML = 'No posts found.';
+                return;
+            }
+        }
+
+        let articles = await Promise.all(posts.list.map(p => createArticleContent(p)))
+
+        for (let articleEl of articles) {
+            section_posts.appendChild(articleEl);
+        }
+
+        document.getElementById('fetchMore').disabled = posts.endOfList;
+        document.getElementById('fetchMore').onclick = () => getPosts();
+    }
+
+    async function createArticleContent(p) {
+        if (!p) {
+            return;
+        }
+        let logged_user_id = (await user).user_id;
+        let record_id = p.record_id;
+        let uploader = await getUserInfo(p.user_id);
+
+        let html = /*html*/`
+            <div>
+                <img class='profilePic' src='${uploader.picture || ""}'>
+                <span class='user_name'>${uploader.name || uploader.email || 'Unknown'}</span>
+            </div>
+            
+            <small class='spaceBetween'>
+                Posted: ${new Date(p.updated).toLocaleString()}
+
+                <ins
+                    class='clickable like'
+                    onclick='this.closest("article").remove(); skapi.deleteRecords({record_id: "${record_id}"});'
+                    ${logged_user_id !== p.user_id ? "hidden" : ""}>Delete Post
+                </ins>
+            </small>
+
+            <img src='${await p.bin.pic[0].getFile('endpoint')}'>
+
+            <div class='spaceBetween'>
+                <small>Liked: <span id="span_likedCount-${p.record_id}">${p.reference.referenced_count}</span></small>
+                <strong
+                    class='clickable like'
+                    id='strong_like-${p.record_id}'
+                    onclick='like("${p.record_id}")'
+                    data-like=''>...</strong>
+            </div>
+
+            <p class='content'>
+                ${p.data?.description}
+            </p>
+
+            <div class='spaceBetween'>
+                <small>${p.tags ? 'Tags: ' + p.tags.map(t => `<a href='instaclone.html#tag=${t}'>${t}</a>`).join(', ') : ''}</small>
+                <small>Comments (<span id='span_commentCount-${p.record_id}'>0</span>)</small>
+            </div>
+
+            <form class='spaceBetween' onsubmit='addComment(event, "${p.record_id}");'>
+                <input name='comment' placeholder='Write Comment'>
+                <input type='submit'>
+            </form>
+            
+            <div id='div_commentSection-${p.record_id}' class='content'></div>
+            <small
+                class='clickable alignRight'
+                id='small_moreComments-${p.record_id}'
+                onclick='getComments("${p.record_id}", true).then(c=>{
+                    for (let div of c.commentDivs) {
+                        document.getElementById("div_commentSection-" + "${record_id}").appendChild(div);
+                    }
+                    document.getElementById("small_moreComments-${record_id}").style.display = c.endOfList ? "none" : "block";})'
+                >More Comments</small>
+            <hr>`;
+
+        let article = document.createElement('article');
+        article.innerHTML = html;
+        article.id = record_id;
+
+        getComments(record_id).then(c => {
+            for (let div of c.commentDivs) {
+                article.querySelector(`#div_commentSection-${record_id}`).appendChild(div);
+            }
+            article.querySelector(`#small_moreComments-${record_id}`).style.display = c.endOfList ? 'none' : 'block';
+        });
+
+        // get comment count
+        skapi.getIndexes({
+            table: 'comments',
+            index: 'comment.' + record_id
+        }).then(commentInfo => {
+            if (commentInfo.list.length) {
+                let count = commentInfo.list[0].number_of_records;
+                if (count) {
+                    let commentCount = article.querySelector('#span_commentCount-' + record_id)
+                    commentCount.innerHTML = count;
+                }
+            }
+        });
+
+        // get users like status
+        skapi.getRecords({
+            table: 'likes',
+            index: {
+                name: '$user_id',
+                value: logged_user_id
+            },
+            reference: record_id
+        }).then(myLike => {
+            if (myLike.list.length) {
+                likeId[record_id] = myLike.list[0].record_id;
+            }
+            let likeButton = article.querySelector(`#strong_like-${record_id}`);
+            likeButton.textContent = '';
+            likeButton.setAttribute('data-like', myLike.list.length ? 'Liked!' : 'Like');
+        });
+
+        return article;
+    }
+
+    async function getUserInfo(user_id) {
+        if (!userInfo[user_id]) {
+            let user = await skapi.getUsers({
+                searchFor: 'user_id',
+                value: user_id
+            });
+
+            if (user.list.length === 0) {
+                return {
+                    email: 'User not found',
+                    name: 'User not found',
+                    picture: ''
+                };
+            }
+
+            userInfo[user_id] = user.list[0];
+        }
+
+        return userInfo[user_id];
+    }
+
+    async function getComments(record_id, fetchMore = false) {
+        // get recent 4 comments (initial fetch)
+        let comments = await skapi.getRecords(
+            {
+                table: {
+                    name: 'comments',
+                    access_group: "authorized"
+                },
+                index: {
+                    name: 'comment.' + record_id,
+                    value: true
+                }
+            },
+            {
+                ascending: false,
+                limit: 4,
+                fetchMore
+            }
+        );
+
+        let commentDivs = [];
+        for (let c of comments.list) {
+            let div = document.createElement('div');
+            let commenter = await getUserInfo(c.user_id);
+
+            let commentHtml = /*html*/ `
+                <small>
+                    <strong>${commenter.name || commenter.email || 'Unknown'}</strong>
+                    <span class='inlineBlock'>(${new Date(c.updated).toLocaleString()})</span>
+                    <br>
+                    <span class='inlineBlock'>${c.data.comment}</span>
+                </small>`;
+            div.innerHTML = commentHtml;
+            commentDivs.push(div);
+        }
+
+        return {commentDivs, endOfList: comments.endOfList};
+    }
+
+    async function addComment(event, record_id) {
+        let userInfo = await user;
+
+        disableForm(event.target, true);
+        let postComment = await skapi.postRecord(event, {
+            table: {
+                name: "comments",
+                access_group: "authorized"
+            },
+            index: {
+                name: "comment." + record_id,
+                value: true
+            }
+        }).finally(() => disableForm(event.target, false));
+
+        event.target.reset();
+
+        let div = document.createElement('div');
+        let commentHtml = /*html*/ `
+        <small>
+            <strong>${userInfo.name || userInfo.email || 'Unknown'}</strong>
+            <span class='inlineBlock'>(${new Date(postComment.updated).toLocaleString()})</span>    
+            <br>
+            <span class='inlineBlock'>${postComment.data.comment}</span>
+        </small>`;
+
+        div.innerHTML = commentHtml;
+        document.getElementById(`div_commentSection-${record_id}`).prepend(div);
+    }
+
+    async function like(record_id) {
+        let likeButton = document.getElementById(`strong_like-${record_id}`);
+        let likedStatus = likeButton.getAttribute('data-like');
+        let likedCount = Number(document.getElementById(`span_likedCount-${record_id}`).textContent);
+
+        likeButton.textContent = '...';
+
+        if (likedStatus === 'Like') {
+            likeId[record_id] = (await skapi.postRecord(null, {
+                table: 'likes',
+                reference: {
+                    record_id: record_id
+                }
+            })).record_id;
+            likeButton.setAttribute('data-like', 'Liked!');
+            likedCount++;
+        }
+        else {
+            await skapi.deleteRecords({record_id: likeId[record_id]});
+            likeButton.setAttribute('data-like', 'Like');
+            likedCount--;
+        }
+
+        likeButton.textContent = '';
+        document.getElementById(`span_likedCount-${record_id}`).textContent = likedCount.toString();
+    }
+
+    async function initialFetch() {
+        let hash = location.hash ? location.hash.slice(1) : '';
+
+        switch (hash) {
+            case 'mostliked':
+                fetchQuery = {
+                    table: {
+                        name: 'posts',
+                        access_group: 'authorized'
+                    },
+                    index: {
+                        name: '$referenced_count',
+                        value: 0,
+                        condition: '>'
+                    }
+                };
+
+                getPosts(false);
+                break;
+
+            case 'mostcomment':
+                getMostCommentedPost(false);
+                break;
+            case 'myposts':
+                fetchQuery = {
+                    table: {
+                        name: 'posts',
+                        access_group: 'authorized'
+                    },
+                    index: {
+                        name: '$user_id',
+                        value: (await user).user_id,
+                    }
+                };
+
+                getPosts(false);
+                break;
+            case 'myprivate':
+                fetchQuery = {
+                    table: {
+                        name: 'posts',
+                        access_group: 'private'
+                    },
+                    index: {
+                        name: '$user_id',
+                        value: (await user).user_id,
+                    }
+                };
+
+                getPosts(false);
+                break;
+            default:
+                fetchQuery = {
+                    table: {
+                        name: 'posts',
+                        access_group: 'authorized'
+                    }
+                };
+
+                if (hash.startsWith('tag=')) {
+                    fetchQuery.tag = hash.slice(4);
+                }
+
+                getPosts(false);
+                break;
+        }
+    }
+
+    async function getMostCommentedPost(fetchMore = true) {
+        document.getElementById('fetchMore').disabled = true;
+
+        let commentIndex = await skapi.getIndexes(
+            {
+                table: 'comments',
+                index: 'comment.',
+                order: {
+                    by: 'total_bool'
+                }
+            },
+            {
+                ascending: false,
+                limit: 4,
+                fetchMore
+            }
+        );
+
+        if (!fetchMore) {
+            section_posts.innerHTML = '';
+            if (commentIndex.list.length === 0) {
+                section_posts.innerHTML = 'No posts found.';
+                return;
+            }
+        }
+
+        let posts = await Promise.all(commentIndex.list.map(i => skapi.getRecords({
+            record_id: i.index.split('.')[1],
+        }).catch(err => null)));
+
+        let articles = await Promise.all(posts.map(p => p ? createArticleContent(p.list[0]) : null));
+
+        for (let articleEl of articles) {
+            if (articleEl) {
+                section_posts.appendChild(articleEl);
+            }
+        }
+
+        document.getElementById('fetchMore').disabled = commentIndex.endOfList;
+        document.getElementById('fetchMore').onclick = () => getMostCommentedPost();
+    }
+    
+    initialFetch();
+    window.addEventListener('hashchange', initialFetch);
+</script>
