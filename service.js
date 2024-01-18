@@ -1,5 +1,4 @@
-// const skapi = new Skapi("ap220wfRHl9Cw2QqeFEc", "f8e16604-69e4-451c-9d90-4410f801c006");
-const skapi = new Skapi("ap211RiB9UbmGsF3xckv", "4d4a36a5-b318-4093-92ae-7cf11feae989", { autoLogin: true }, { "hostDomain": "skapi.app", "target_cdn": "d1wrj5ymxrt2ir" });
+const skapi = new Skapi("ap220wfRHl9Cw2QqeFEc", "f8e16604-69e4-451c-9d90-4410f801c006");
 
 function disableForm(form, disabled) {
     form.querySelectorAll('input').forEach(input => {
