@@ -16,7 +16,7 @@
 <main id="main_page">
     <form action='../index.html' onsubmit="
         disableForm(this, true);
-        skapi.signup(event).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));
+        skapi.signup(event, {login:true}).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));
     ">
         <div class="spaceBetween">
             <h2>Create Account</h2>
