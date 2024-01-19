@@ -4,6 +4,10 @@ Welcome to the complete tutorial project for Skapi, featuring a web application 
 
 This tutorial focuses on demonstrating the use of Skapi to build a full-fledged application. The emphasis is on functionality over aesthetics.
 
+## Pre Requisites
+
+You must change the **service_id** and the **owner_id** in `service.js` file.
+
 ## Opening the Project
 
 This project does not require any build tools. Simply open the `index.html` file in your browser, and it will just work.
@@ -28,9 +32,9 @@ You will be able to access the project at `http://localhost:3000`.
 
 ### Built with Pure Static HTML, CSS and JavaScript
 
-While Skapi is compatible with various frameworks, this tutorial utilizes pure static HTML, CSS, and JavaScript. It showcases how even basic static HTML can be powerful enough to create a complete application, an aspect often overlooked and it's blazing fast.
+While Skapi is compatible with various frameworks, this tutorial utilizes pure static HTML, CSS, and JavaScript. It showcases how even basic static HTML can be powerful enough to create a complete application, an aspect often overlooked.
 
-This tutorial not only focuses on the fundamentals and core basics but also gives you some good practices in using static HTML for web application development.
+This tutorial not only focuses on the fundamentals and core basics but also gives you some good tips in developing static HTML with Skapi.
 
 The CSS stylings are intentionally minimalistic, yet the application remains fully responsive across different devices.
 
