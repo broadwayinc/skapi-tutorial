@@ -58,4 +58,6 @@ This tutorial encompasses all aspects of heavy lifting in production-level appli
   - Post deletion
 
 - Simple Chat Room Application
-  - Send/Receive text messages in chat room
+  - broadcast text message in chat room
+  - Send/Receive private text message between users
+  - List all users in chat room

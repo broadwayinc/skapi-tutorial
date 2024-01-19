@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@beta/dist/skapi.js"></script>
 <script src="../service.js"></script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
@@ -214,7 +214,7 @@
         let html = /*html*/`
             <div>
                 <img class='profilePic' src='${uploader.picture || ""}'>
-                <span class='user_name'>${uploader.name || uploader.email || 'Unknown'}</span>
+                <span class='user_name'>${uploader.name}</span>
             </div>
             
             <small class='spaceBetween'>
@@ -357,7 +357,7 @@
 
             let commentHtml = /*html*/ `
                 <small>
-                    <strong>${commenter.name || commenter.email || 'Unknown'}</strong>
+                    <strong>${commenter.name}</strong>
                     <span class='inlineBlock'>(${new Date(c.updated).toLocaleString()})</span>
                     <br>
                     <span class='inlineBlock'>${c.data.comment}</span>
@@ -389,7 +389,7 @@
         let div = document.createElement('div');
         let commentHtml = /*html*/ `
         <small>
-            <strong>${userInfo.name || userInfo.email || 'Unknown'}</strong>
+            <strong>${userInfo.name}</strong>
             <span class='inlineBlock'>(${new Date(postComment.updated).toLocaleString()})</span>    
             <br>
             <span class='inlineBlock'>${postComment.data.comment}</span>
