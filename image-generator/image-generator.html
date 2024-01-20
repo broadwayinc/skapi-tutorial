@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+<script src="../service.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+<link rel="stylesheet" href="../custom.css">
+<script>
+    let user = checkProfile({
+        kickRoute: '../index.html',
+        kickUser: 'unsigned'
+    });
+</script>
+<main id="main_page">
+    <div class="spaceBetween">
+        <h2>Image Generator</h2>
+        <a href="../index.html">Back</a>
+    </div>
+    <hr>
+    <div id="generated">
+        <p>Describe an image you want to generate</p>
+    </div>
+    <style>
+        #generated img {
+            width: 100%;
+        }
+    </style>
+    <textarea id='textarea_imageDescription' rows="4" placeholder="Describe an image"></textarea>
+    <style>
+        textarea {
+            width: 100%;
+        }
+    </style>
+    <div class="alignRight">
+        <button id='button_generate' onclick="imgGen()">Generate</button>
+    </div>
+</main>
+<script>
+    function imgGen() {
+        let description = textarea_imageDescription.value;
+        if (description.length === 0) {
+            alert('Please describe an image you want to generate');
+            return;
+        }
+
+        generated.innerHTML = /*html*/ `<p>Generating... Please wait</p>`;
+
+        textarea_imageDescription.disabled = true;
+        button_generate.disabled = true;
+
+        skapi.clientSecretRequest({
+            clientSecretName: 'openai',
+            url: 'https://api.openai.com/v1/images/generations',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer $CLIENT_SECRET'
+            },
+            data: {
+                model: "dall-e-3",
+                prompt: description,
+                n: 1,
+                size: "1024x1024",
+                style: "vivid"
+            }
+        }).then(r => {
+            if (r.error) {
+                generated.innerHTML = /*html*/ `<p>Describe an image you want to generate</p>`;
+                alert(r.error.message);
+                return;
+            }
+
+            let data = r.data[0]
+            let html = /*html*/ `
+                <img src="${data.url}">
+                <p>${data.revised_prompt}</p>`;
+                
+            generated.innerHTML = html;
+        }).finally(() => {
+            textarea_imageDescription.disabled = false;
+            button_generate.disabled = false;
+        });
+    }
+</script>

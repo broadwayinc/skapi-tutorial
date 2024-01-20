@@ -65,3 +65,6 @@ This tutorial encompasses all aspects of heavy lifting in production-level appli
   - broadcast text message in chat room
   - Send/Receive private text message between users
   - List all users in chat room
+
+- AI Image Generator
+  - Generate images using AI with given text
