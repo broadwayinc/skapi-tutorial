@@ -1,5 +1,5 @@
 /*
-    This service.js code will be loaded on every page of your website.
+    This service.js code will be loaded on almost every page of your website.
     Each page will have access to the skapi object.
 */
 
