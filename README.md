@@ -68,3 +68,4 @@ This tutorial encompasses all aspects of heavy lifting in production-level appli
 
 - AI Image Generator
   - Generate images using AI with given text
+  - Making a request to OpenAI API with client secret key
