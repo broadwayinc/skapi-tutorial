@@ -8,7 +8,7 @@ This tutorial focuses on demonstrating the use of Skapi to build a full-fledged 
 
 You must change the **service_id** and the **owner_id** in `service.js` file. You can retrieve the service ID and owner ID from the Skapi dashboard.
 
-For more information, please refer to the [Skapi Documentation](https://docs.skapi.com/getting-started.html).
+For more information, please refer to the [Skapi Documentation](https://docs.skapi.com/introduction/getting-started.html).
 
 ## Opening the Project
 
