@@ -1,3 +1,6 @@
+<!--
+    This page for account creation.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -5,15 +8,26 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
-
 <script>
-    checkProfile({
-        kickRoute: '../index.html',
-        kickUser: 'signed'
+    /*
+        We will check if the user is logged in.
+        If the user is logged in, it means that the user already has an account.
+        So we will redirect the user to the home page.
+    */
+    skapi.getProfile().then(user => {
+        if (user) {
+            location.href = '../index.html';
+            return;
+        }
     });
 </script>
 
 <main id="main_page">
+    <!--
+        We will use the skapi.signup() function to create an account.
+        On the second parameter, we set login to true so that the user will be logged in right after account creation is successful.
+        On the form action, we set it to ../index.html so that the user will be redirected to the home page after account creation.
+    -->
     <form action='../index.html' onsubmit="
         disableForm(this, true);
         skapi.signup(event, {login:true}).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));

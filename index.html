@@ -1,17 +1,66 @@
+<!--
+    index.html is the first page your user will see when they visit your website.
+    It will show either the login dialog or the main page of your website.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!--
+    Following <script> tag will import skapi.js that is hosted on jsdelivr CDN, so you don't need to download it.
+-->
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+
+<!--
+    Import the service.js code that contains your initialization of Skapi class,
+    and the disableForm() function that will be used in this tutorial.
+-->
 <script src="service.js"></script>
 
+<!--
+    Following <link> tag will import init.css that is hosted on jsdelivr CDN.
+    This is a CSS file that will reset the default styling of html to modern standard, which is a great starting point for your website.
+    For more information: https://github.com/broadwayinc/modern-init-css
+-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
+
+<!--
+    Following <link> tag will import custom.css that is hosted on your own website.
+    We provided a custom.css file for minimal styling of your website.
+    Feel free to modify it to your liking.
+-->
 <link rel="stylesheet" href="custom.css">
 
+<!--
+    Following <dialog> contains the login form.
+    It will be shown when the user is not logged in.
+-->
 <dialog id="dialog_login">
     <h2>Login</h2>
     <form onsubmit="
+            /*
+                Following disableForm() is a function that is imported from service.js.
+                It will disable all input elements inside the form.
+                This is to prevent the user from submitting the form multiple times.
+                You can find the implementation of this function in every form in the tutorial.
+            */
             disableForm(this, true);
+
+            /*
+                skapi.login() will login the user with the provided email and password.
+                skapi.login() takes submit event directly as the first parameter.
+                If the login is successful, it will call the main() function.
+                The main() function will be declared at the end of the page in the <script> tag.
+                The main() function will decide to show the main page or the login form depending on the login status.
+                If the login is unsuccessful, it will show an alert with the error message.
+                Finally, it will call disableForm() with second argument value to [true] to enable all the input elements back again.
+            */
             skapi.login(event).then(main).catch(async err=>{
                 if(err.code === 'USER_IS_DISABLED') {
+                    /*
+                        If the user account is disabled, you can ask the user if they want to recover their account.
+                        If they do, we will call skapi.recoverAccount() to send a recovery email to the user.
+                        Then we will redirect the user to the recover-account.html page that gives the user instructions to recover their account.
+                    */
                     let recover = confirm('Your account is disabled. Would you like to recover your account?');
                     if(recover) {
                         await skapi.recoverAccount();
@@ -24,6 +73,11 @@
                 }
             }).finally(()=>disableForm(this, false));
     ">
+        <!--
+            Following <table> contains the login form.
+            Note that all input elements are required to have "name" attributes.
+            The "name" attribute value will be used as the key of the data that will be sent to the server.
+        -->
         <table>
             <tr>
                 <td>Email</td>
@@ -39,49 +93,43 @@
             </tr>
             <tr>
                 <td></td>
-                <td id="td_forgotPassword">
+                <td class="alignRight">
+                    <!--
+                        Following <a> tag will link to the forgot-password.html page.
+                        This page will allow the user to reset their password.
+
+                        Style class "alignRight" is used to align the <a> tag to the right.
+                        You can find more predefined style classes in custom.css.
+                    -->
                     <a href="authentication/forgot-password.html">
                         <small>Forgot Password?</small>
                     </a>
-                    <style>
-                        #td_forgotPassword {
-                            text-align: right;
-                        }
-                    </style>
                 </td>
             </tr>
         </table>
         <br>
         <div class="alignRight">
+            <!--
+                Following <a> tag will link to the create-account.html page.
+                This page will allow the user to create a new account.
+            -->
             <a href="authentication/create-account.html">
                 <small>Create Account</small>
             </a>
+            &nbsp;&nbsp;
             <input type="submit" value="Login">
-            <style>
-                .alignRight>a {
-                    display: inline-block;
-                }
-
-                .alignRight>input {
-                    margin-left: 1rem;
-                }
-
-                .alignRight>small {
-                    display: block;
-                    color: crimson;
-                }
-            </style>
         </div>
     </form>
 </dialog>
+
+<!--
+    Following <main> contains the main page of your website.
+    It will be shown when the user is logged in.
+    It will show the user's profile picture, name, email, and birthday when available.
+    It will also show links to the other pages of this tutorial.
+-->
 <main id="main_page">
-    <section id="section_userPage">
-        <style>
-            #section_userPage {
-                display: none;
-            }
-        </style>
-        
+    <section>
         <img src="" id="img_profilePic" class="profilePic">
         You're Logged In
 
@@ -106,13 +154,32 @@
             <a href="authentication/update-profile.html">Update Profile</a>
         </div>
         <br>
+
+        <!--
+            Following <button> tag will logout the user when clicked.
+            It will call skapi.logout() to logout the user.
+            Then it will call the main() function to decide to show the main page or the login form depending on the login status.
+        -->
         <button onclick="skapi.logout().then(main)">Logout</button>
     </nav>
 </main>
+
 <script>
-    let main = () => checkProfile().then(u => {
+    /*
+        Following main() function will decide to show the main page or the login form depending on the login status.
+        The main() function calls skapi.getProfile() to get the user's profile.
+        If the user is logged in, skapi.getProfile() will return the user's profile when the promise is resolved.
+        If the user is not logged in, skapi.getProfile() will return null when the promise is resolved.
+        Then the main() function will show the main page if the user is logged in, or show the login form if the user is not logged in.
+    */
+    let main = () => skapi.getProfile().then(u => {
         if (u) {
-            section_userPage.style.display = 'block';
+            /*
+                If the user is logged in, we will show the main page.
+                The resolved value of skapi.getProfile() is the user's profile object.
+                We will also show the user's profile picture, name, email, and birthday when available.
+            */
+            main_page.style.display = 'block';
             h1_helloText.textContent = `Hello "${u.name}"!`;
             h3_yourEmail.textContent = `Your login email is: ${u.email}`;
             h3_birthdayReminder.textContent = u.birthdate ? `And you were born in ${new Date(u.birthdate).toDateString()}!` : '';
@@ -120,7 +187,7 @@
             dialog_login.close();
         }
         else {
-            section_userPage.style.display = 'none';
+            main_page.style.display = 'none';
             dialog_login.showModal();
         }
 

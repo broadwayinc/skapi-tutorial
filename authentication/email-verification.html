@@ -5,15 +5,17 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
-
 <script>
-    checkProfile({
-        kickRoute: '../index.html',
-        kickUser: 'unsigned'
-    }).then(user => {
-        if (user.email_verified) {
+    let user;
+    skapi.getProfile().then(u => {
+        if (!u) {
+            location.href = '../index.html';
+            return;
+        }
+        if (u.email_verified) {
             location.href = 'update-profile.html';
         }
+        user = u;
     });
 </script>
 

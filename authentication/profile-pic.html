@@ -72,10 +72,11 @@
 
 <script>
     let user;
-    checkProfile({
-        kickRoute: '../index.html',
-        kickUser: 'unsigned'
-    }).then(u => {
+    skapi.getProfile().then(u => {
+        if (!u) {
+            location.href = '../index.html';
+            return;
+        }
         img_preview.src = u.picture || "";
         user = u;
     });

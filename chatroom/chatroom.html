@@ -6,9 +6,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
 <script>
-    let user = checkProfile({
-        kickRoute: '../index.html',
-        kickUser: 'unsigned'
+    let user = skapi.getProfile().then(u => {
+        if (!u) {
+            location.href = '../index.html';
+        }
+        return u;
     });
 </script>
 <dialog id="privateMsg">

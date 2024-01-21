@@ -7,9 +7,11 @@
 <link rel="stylesheet" href="../custom.css">
 
 <script>
-    checkProfile({
-        kickRoute: '../index.html',
-        kickUser: 'unsigned'
+    skapi.getProfile().then(u => {
+        if (!u) {
+            location.href = '../index.html';
+            return;
+        }
     });
 </script>
 
@@ -33,13 +35,8 @@
         <p><strong>Note: </strong>Your account cannot be recovered if you have not verified your email address.</p>
         <p>If you would like to proceed, please click the button below.</p>
         <br>
-        <div id="div_singleInput">
+        <div class="alignCenter">
             <input type="submit" value="Remove Account">
-            <style>
-                #div_singleInput {
-                    text-align: center;
-                }
-            </style>
         </div>
     </form>
 </main>

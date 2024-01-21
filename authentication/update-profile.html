@@ -1,3 +1,9 @@
+<!--
+    This page is for updating user profile.
+    It is a form that allows user to update their profile picture, name, birthday, option to make their email address available to public or change their login email.
+    It also shows the last login time and allows user to verify their email.
+    It also allows user to change their password and remove their account.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -27,6 +33,9 @@
                     </span>
                 </td>
                 <td>
+                    <!--
+                        When the user clicks on the profile picture, it will open the profile-pic.html page, where the user can upload a new profile picture.
+                    -->
                     <a class='imgLink' href="profile-pic.html">
                         <img src="" id="img_profilePic" class="profilePic">
                         Update Profile Picture
@@ -79,7 +88,11 @@
                     <input id='input_emailPublic' name="email_public" type="checkbox">
                     <small class="inlineBlock">(Email verification required)</small>
                     <style>
-                        #input_emailPublic+small {
+                        /*
+                            We will disable the checkbox if the user's email is not verified.
+                            We will hide the preceding small tag noting 'Email verification required' if the checkbox is enabled.
+                        */
+                        #input_emailPublic:not([disabled])+small {
                             display: none;
                         }
                     </style>
@@ -94,6 +107,11 @@
                 <td>
                     <span id="span_emailVerified"></span>
                     <ins class='clickable inlineBlock' onclick="
+                        /*
+                            When the user clicks on (Click to verify your email), it will ask user to received a verification email.
+                            If the user confirms, it will send a verification email to the user.
+                            Then, the user will be redirected to the email-verification.html page where the user can enter the verification code to verify their email address.
+                        */
                         let userConfirm = confirm(`We will send a verification email to ${user.email}. Continue?`);
                         if(userConfirm) {
                             skapi.verifyEmail().then(()=>location.href = 'email-verification.html').catch(err=>alert(err=>alert(err.message)));
@@ -103,6 +121,11 @@
                             (Click to verify your email)
                         </small>
                         <style>
+                            /*
+                                We are using css to show the email verification status dynamically.
+                                We will show 'Yes' if the email is verified and 'No' if the email is not verified.
+                                We will hide the preceding clickable small tag (Click to verifiy your email) if the email is verified.
+                            */
                             #span_emailVerified.false::before {
                                 content: 'No ';
                                 display: inline-block;
@@ -126,6 +149,9 @@
                     </span>
                 </td>
                 <td>
+                    <!--
+                        When the user clicks the link below, it will open the change-password.html page, where the user can change their password.
+                    -->
                     <a href="change-password.html">Change Password</a>
                 </td>
             </tr>
@@ -136,6 +162,9 @@
             <br>
             <br>
             <small>
+                <!--
+                    When the user clicks the link below, it will open the remove-account.html page, where the user can remove their account.
+                -->
                 <a href="remove-account.html">Remove Account</a>
             </small>
         </div>
@@ -144,27 +173,39 @@
 
 <script>
     let user;
-    checkProfile({
-        kickRoute: '../index.html',
-        kickUser: 'unsigned'
-    }).then(u => {
-        user = u;
-        if (!user) {
+    skapi.getProfile().then(u => {
+        if (!u) {
+            /*
+                If the user is not logged in, redirect the user to the index.html page.
+            */
             location.href = '../index.html';
+            return;
         }
 
-        span_logTime.textContent = new Date(user.log * 1000).toLocaleString();
+        /*
+            We will set the user variable to the user object.
+            We will use the user variable to access the user email to show confirmation dialog when the user clicks on (Click to verify your email).
+        */
+        user = u;
 
+        span_logTime.textContent = new Date(user.log * 1000).toLocaleString();
         input_email.value = user.email;
         input_name.value = user.name;
-        input_birthdate.value = user.birthdate || '';
+        input_birthdate.value = user.birthdate || "";
         img_profilePic.src = user.picture || "";
 
         span_emailVerified.classList.add(user.email_verified.toString());
         if (!user.email_verified) {
+            /*
+                If the user's email is not verified, we will disable the email public checkbox.
+                User needs to verify their email before they can make their email public.
+            */
             input_emailPublic.disabled = true;
         }
 
+        /*
+            We will set the email public checkbox to checked if the user's email is public and verified.
+        */
         input_emailPublic.checked = user.email_public && user.email_verified;
     });
 </script>
