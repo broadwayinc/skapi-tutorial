@@ -15,6 +15,13 @@
 <main id="main_page">
     <form action='../index.html' onsubmit="
         disableForm(this, true);
+        /*
+            skapi.updateProfile() will update the user profile with the provided data.
+            skapi.updateProfile() takes submit event directly as the first parameter.
+            If the update is successful, it will redirect the user to ../index.html page.
+            If the update is unsuccessful, it will show an alert with the error message.
+            Finally, it will call disableForm() with second argument value to [true] to enable all the input elements back again.
+        */
         skapi.updateProfile(event).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));
     ">
         <div class="spaceBetween">
@@ -34,7 +41,8 @@
                 </td>
                 <td>
                     <!--
-                        When the user clicks on the profile picture, it will open the profile-pic.html page, where the user can upload a new profile picture.
+                        When the user clicks on the profile picture, it will open the profile-pic.html page,
+                        where user can upload a new profile picture.
                     -->
                     <a class='imgLink' href="profile-pic.html">
                         <img src="" id="img_profilePic" class="profilePic">

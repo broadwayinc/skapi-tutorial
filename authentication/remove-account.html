@@ -1,3 +1,7 @@
+<!--
+    This page is used to remove the user's account.
+    The page is redirected from the update-profile.html page when the user clicks the "Remove Account" link.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -6,11 +10,14 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
 
+<!--
+    Following <script> will check if the user is logged in.
+    If the user is not logged in, it will redirect the user to ../index.html page.
+-->
 <script>
     skapi.getProfile().then(u => {
         if (!u) {
             location.href = '../index.html';
-            return;
         }
     });
 </script>

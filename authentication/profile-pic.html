@@ -1,3 +1,7 @@
+<!--
+    This page is used to update the profile picture of the user.
+    It uses Skapi database to upload the image file and update the user's profile with the endpoint of the image url.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -7,24 +11,31 @@
 <link rel="stylesheet" href="../custom.css">
 
 <main id="main_page">
-    <form onsubmit="
+    <!--
+        Following <form> will update the profile picture to the database, and update the user's profile with the endpoint of the image url.
+        When user submits, we will call updateProfilePic() function that we will declare later.
+    -->
+    <form class='alignCenter' onsubmit="
         disableForm(this, true);
         updateProfilePic(event).finally(()=>disableForm(this, false));
     ">
-        <style>
-            form {
-                text-align: center;
-            }
-        </style>
         <div class="spaceBetween">
             <h2>Profile Pic</h2>
-            <a id="a_backLink" href="javascript:history.back()">Back</a>
+            <a id="a_backLink" href="update-profile.html">Back</a>
         </div>
         <hr>
+        <!--
+            Following <label> will be used to preview the image file that the user will upload.
+            Because the image is wrapped in a <label> tag that is targeted to the file input element,
+            when the user clicks on the image, it will open the file dialog.
+        -->
         <label for='input_fileInput' class="clickable">
             <img id='img_preview' src="">
             <br>
             <style>
+                /*
+                    Following CSS will make the empty image look like a button with 'Choose Image' text.
+                */
                 img {
                     width: 100%;
                     object-fit: cover;
@@ -48,12 +59,19 @@
         <input id='input_fileInput' type="file" name="pic" accept="image/*" hidden required>
         <input type="submit" value="Update">
         <style>
+            /*
+                Following CSS will disable the submit button when the file input is empty.
+            */
             #input_fileInput:invalid+input[type=submit] {
                 pointer-events: none;
                 opacity: 0.5;
             }
         </style>
         <script>
+            /*
+                Following code will preview the image file that the user will upload.
+                When the user selects a file, it will read the file and set the src attribute of the image tag to the data url(base64) of the file.
+            */
             input_fileInput.onchange = function () {
                 let file = this.files[0];
                 if (!file) {
@@ -71,6 +89,11 @@
 </main>
 
 <script>
+    /*
+        Following code will check if the user is logged in.
+        If the user is not logged in, it will redirect the user to ../index.html page.
+        If user is logged in, it will set the user variable to the user object to use later.
+    */
     let user;
     skapi.getProfile().then(u => {
         if (!u) {
@@ -81,13 +104,25 @@
         user = u;
     });
 
+    /*
+        Following function will update the profile picture to the database, and update the user's profile with the endpoint of the image url.
+    */
     async function updateProfilePic(event) {
         a_backLink.textContent = `0%`;
 
+        /*
+            Following recordParams object will be used to upload the image file to the database.
+            It will set the table to 'profile_pic' to upload the image file to the 'profile_pic' table.
+            In case the user already has a profile picture and is updating the profile picture, it will set the record_id to the record id of the user's profile picture.
+        */
         let recordParams = {
             record_id: user.picture ? user.picture.split('/records/')[1].split('/')[0] : null,
             table: 'profile_pic',
             progress: (p) => {
+                /*
+                    The progress callback function to update the progress text.
+                    It will update the progress text only when the status is 'upload' and the currentFile is not null.
+                */
                 if (p.status === 'upload' && p.currentFile) {
                     a_backLink.textContent = `${Math.floor(p.progress)}%`;
                 }
@@ -95,15 +130,32 @@
         }
 
         if (user.picture) {
+            /*
+                If the user already has a profile picture and is updating the profile picture,
+                it will set the remove_bin property to the user's profile picture.
+                This will remove the user's profile picture from the database.
+                You can give either file object or the endpoint of the image url to the remove_bin property.
+                In this case, we will give the endpoint of the image url to the remove_bin property.
+            */
             recordParams.remove_bin = [user.picture];
         }
 
         try {
             let record = await skapi.postRecord(event, recordParams);
+
+            /*
+                Following code will update the user's profile with the endpoint of the image url.
+                It will call skapi.updateProfile() method to update the user's profile.
+                It will set the picture property to the endpoint of the image url which will be the last url in the bin array.
+                Then it will redirect the user back to update-profile.html page.
+            */
             await skapi.updateProfile({picture: record.bin.pic.slice(-1)[0].url});
             location.href = '../index.html';
         }
         catch (err) {
+            /*
+                If there is an error, it will show an alert with the error message.
+            */
             alert(err.message);
         }
 

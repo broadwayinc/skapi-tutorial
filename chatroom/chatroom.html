@@ -1,3 +1,9 @@
+<!--
+    This page shows how you can use Skapi to create a chat room.
+    When the user joins the chat room, it will show a list of other users who have joined the chat room.
+    If there is no other users in the chat room the list will not show.
+    User can click on other users in the list to send private message to them.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -5,6 +11,11 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
+
+<!--
+    Following code will check if the user is logged in.
+    If the user is not logged in, it will redirect the user to ../index.html page.
+-->
 <script>
     let user = skapi.getProfile().then(u => {
         if (!u) {
@@ -13,15 +24,31 @@
         return u;
     });
 </script>
+
+<!--
+    Following <dialog> element is for sending private message.
+    When user clicks on a user in the list, it will show the <dialog> element.
+    The <dialog> element will show the name of the user that you are communicating with.
+    When user submits the form, it will send/reply the private message to the other user.
+-->
 <dialog id="privateMsg">
     <small>Private Message: <span id="msgTo"></span></small>
     <p id="privateMsgBox"></p>
+
+    <!--
+        Following <form> will send/reply the private message to the other user.
+        When user submits, we will use the skapi.postRealtime() method to send/reply the private message.
+        On the second argument of skapi.postRealtime(), we are giving privateChat variable which is set it to the user_id of the other user.
+        We will declare privateChat variable later on the script tag below.
+        When the private message is sent, it will close the <dialog> element.
+    -->
     <form onsubmit="skapi.postRealtime(event, privateChat).then(()=>{this.reset(); privateMsg.close();})">
         <input type="text" name='msg' placeholder="Say something">
         <input type="submit" value="Send">
     </form>
     <small class='clickable' onclick="privateMsg.close()">Close</small>
 </dialog>
+
 <main>
     <div>
         <div class="spaceBetween">
@@ -30,18 +57,38 @@
         </div>
         <div id="chatBox">
             <section id="chatSection">
+                <!--
+                    Following <div> element will show the messages in the chat room.
+                    We will write a javascript code to append the messages to this <div> element later.
+                -->
                 <div id="chat"></div>
+                <!--
+                    Following <form> will send the message to the chat room.
+                    When user submits, we will use the skapi.postRealtime() method to send the message to the chat room.
+                    On the second argument of skapi.postRealtime(), we are giving 'chat' which is the name of the chat room.
+                    We will let the user to join the chat room named 'chat' later on the script tag below.
+                    When the message is sent, it will reset the form.
+                -->
                 <form onsubmit="skapi.postRealtime(event, 'chat').then(()=>this.reset())">
                     <input id='inputMsg' type="text" name='msg' placeholder="Say something" disabled>
                     <input id='sendMsg' type="submit" value="Send" disabled>
                 </form>
             </section>
+            <!--
+                Following <section> element will show the list of users who have joined the chat room.
+                We will write a javascript code to append the users to this <section> element later.
+            -->
             <section id="joinedUsers"></section>
         </div>
     </div>
 </main>
 <script>
-    let privateChat = '';
+    /*
+        Following function getUserInfo() will be used to get the user's information.
+        It is called when the user joins the chat room, receives a message.
+        To save the API calls, we will save the user's information in the userInfo object,
+        and return the user's information from the object if it is already saved.
+    */
     let userInfo = {};
     function getUserInfo(user_id) {
         if (!userInfo[user_id]) {
@@ -65,16 +112,21 @@
         return userInfo[user_id];
     }
 
+    /*
+        Following function listUser() will be used to create the <div> element that contains a user's profile image and name.
+        We will use this <div> element to append to the list of joined users in the chat room.
+    */
+    let privateChat = '';
     let listUser = async (u) => {
         if (document.getElementById(u.user_id)) {
             return;
         }
 
-        let me = await user;
-        if (u.user_id === me.user_id) {
-            return;
-        }
+        let me = await user; // the user varaible is declared on the top of the script tag. If the promise is resolved, it will contain the user's profile.
 
+        /*
+            Following code will create the html content with the user's information.
+        */
         let joinedHtml = /*html*/ `
                         <img src="${u.picture || ''}" class="profilePic">
                         <b>${u.name}</b>
@@ -85,6 +137,14 @@
         joinedDiv.innerHTML = joinedHtml;
         joinedUsers.append(joinedDiv);
 
+        if (u.user_id === me.user_id) {
+            return;
+        }
+
+        /*
+            When the other user is clicked, it will show the <dialog> element to send private message to that user.
+            When clicked, it sets the privateChat variable to the user's id so it can be used to send private message to that user.
+        */
         joinedDiv.onclick = () => {
             privateMsg.showModal();
             msgTo.textContent = u.name;
@@ -93,11 +153,23 @@
         }
     }
 
+    /*
+        Following function rtCallback will be used as a callback function of realtime connection.
+        Anytime user receives a realtime message, this callback is triggered.
+    */
     let rtCallback = async (rt) => {
-        let me = await user;
+        let me = await user; // the user varaible is declared on the top of the script tag. If the promise is resolved, it will contain the user's profile.
 
+        /*
+            Following code will check if the realtime message is a notice.
+            If the realtime message is a notice, it will check if the notice is about a user joining or leaving the chat room.
+            If the notice is about a user joining or leaving the chat room, it will show the notice in the chat room.
+        */
         if (rt.status === 'notice') {
             if (rt.message.includes('joined the message group.')) {
+                /*
+                    Everytime a user message is received, we will get the user's profile information and append the user's name to the chat room.
+                */
                 return getUserInfo(rt.sender).then(async u => {
                     let html = /*html*/ `
                     <div class='alignCenter'>-- ${u.name} has joined the chat --</div>
@@ -128,6 +200,10 @@
             }
         }
 
+        /*
+            Following code will check if the realtime message is a message.
+            If the realtime message is a message, it will show the message in the chat room.
+        */
         if (rt.status === 'message') {
             let sender = await getUserInfo(rt.sender);
             let html = /*html*/ `
@@ -150,6 +226,10 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
+        /*
+            Following code will check if the realtime message is a private message.
+            If the realtime message is a private message, it will show the private message in the <dialog> element.
+        */
         if (rt.status === 'private') {
             if (me.user_id === rt.sender) {
                 return;
@@ -163,7 +243,21 @@
         }
     }
 
+    /*
+        Following code will connect to the realtime server.
+    */
     skapi.connectRealtime(rtCallback);
+
+    /*
+        Following code will join the chat room named 'chat'.
+        We are using skapi.joinRealtime() method to let the user joins to the chat room named 'chat'.
+        When successful, it will call skapi.getRealtimeUsers() method to get the list of users who have joined the chat room.
+        Then it will call getUserInfo() function to get each user's information.
+        Then it will call listUser() function to append the user's information to the list of joined users in the chat room.
+        Notice that we are using setTimeout() method to delay the process for 1 second.
+        This is because we want to make sure that the previous realtime connection is disconnected before we make new connection to the realtime server again.
+        This can happens when user refreshes the page.
+    */
     setTimeout(() =>
         skapi.joinRealtime({group: 'chat'}).then(() => {
             inputMsg.disabled = false;

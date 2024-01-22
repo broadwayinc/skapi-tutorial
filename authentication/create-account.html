@@ -17,15 +17,15 @@
     skapi.getProfile().then(user => {
         if (user) {
             location.href = '../index.html';
-            return;
         }
     });
 </script>
 
 <main id="main_page">
     <!--
-        We will use the skapi.signup() function to create an account.
-        On the second parameter, we set login to true so that the user will be logged in right after account creation is successful.
+        Following <form> will create an account for the user.
+        When user submits, we will use the skapi.signup() function to create an account.
+        On the second argument of skapi.signup(), we set login to true so that the user will be logged in right after account creation is successful.
         On the form action, we set it to ../index.html so that the user will be redirected to the home page after account creation.
     -->
     <form action='../index.html' onsubmit="

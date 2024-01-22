@@ -1,3 +1,6 @@
+<!--
+    This page provides AI image generation using OpenAI's API.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -5,6 +8,11 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
+
+<!--
+    Following <script> will check if the user is logged in.
+    If the user is not logged in, it will redirect the user to ../index.html page.
+-->
 <script>
     let user = skapi.getProfile().then(u => {
         if (!u) {
@@ -13,6 +21,7 @@
         return u;
     });
 </script>
+
 <main id="main_page">
     <div class="spaceBetween">
         <h2>Image Generator</h2>
@@ -34,10 +43,19 @@
         }
     </style>
     <div class="alignRight">
+        <!--
+            When the user clicks the button, we will call the imgGen() function.
+            We will declare the imgGen() function on the <script> tag below.
+        -->
         <button id='button_generate' onclick="imgGen()">Generate</button>
     </div>
 </main>
 <script>
+    /*
+        Following function will generate an image using OpenAI's API.
+        When successful, it will show the generated image.
+        When unsuccessful, it will show an alert with the error message.
+    */
     function imgGen() {
         let description = textarea_imageDescription.value;
         if (description.length === 0) {
@@ -50,6 +68,14 @@
         textarea_imageDescription.disabled = true;
         button_generate.disabled = true;
 
+        /*
+            We will use the clientSecretRequest() method to call the OpenAI's API.
+            We will pass the url, method, headers and post data according to the OpenAI's API documentation.
+            The client secret name is the key name of the client secret you may have saved in the service dashboard.
+            For more information about the setting your client secret keys, visit: https://docs.skapi.com/service-settings/service-settings.html#client-secret-key
+            When successful, it will return the response data.
+            When unsuccessful, it will return the error object.
+        */
         skapi.clientSecretRequest({
             clientSecretName: 'openai',
             url: 'https://api.openai.com/v1/images/generations',
@@ -76,7 +102,7 @@
             let html = /*html*/ `
                 <img src="${data.url}">
                 <p>${data.revised_prompt}</p>`;
-                
+
             generated.innerHTML = html;
         }).finally(() => {
             textarea_imageDescription.disabled = false;

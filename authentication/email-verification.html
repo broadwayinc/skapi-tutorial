@@ -1,3 +1,8 @@
+<!--
+    This page is for email verification.
+    This page is redirect from update-profile.html after the user clicks on the "(Click to verify your email)" button.
+    At this point, the user will receive the verification code in the email.
+-->
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
@@ -6,6 +11,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-init-css@latest/init.css">
 <link rel="stylesheet" href="../custom.css">
 <script>
+    /*
+        Following code will check if the user is logged in.
+        If the user is not logged in, it will redirect the user to ../index.html page.
+        Also, if the user has already verified the email, it will redirect the user to update-profile.html page.
+    */
     let user;
     skapi.getProfile().then(u => {
         if (!u) {
@@ -20,6 +30,11 @@
 </script>
 
 <main id="main_page">
+    <!--
+        Following <form> will verify the email of the user.
+        When successful, it will show an alert with the message "Your email is verified." and redirect the user back to update-profile.html page.
+        When unsuccessful, it will show an alert with the error message.
+    -->
     <form action='update-profile.html' onsubmit="
         disableForm(this, true);
         skapi.verifyEmail(event).then(r=>alert('Your email is verified.')).catch(err=>alert(err.message)).finally(()=>disableForm(this, false));
