@@ -13,13 +13,7 @@ This tutorial is deployed at [https://tutorial.skapi.com](https://tutorial.skapi
 
 This project does not require any build tools. Simply open the `index.html` file in your browser, and it will just work.
 
-If you are on remote server, install npm packages from your project directory:
-
-```bash
-npm i
-```
-
-Then, run the following command to build the project:
+If you are on remote server, run the following command to host the project:
 
 ```bash
 npm run start 3000
