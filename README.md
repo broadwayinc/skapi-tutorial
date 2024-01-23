@@ -74,3 +74,36 @@ This tutorial encompasses all aspects of heavy lifting in production-level appli
 ### Detailed Documentation
 
 All the code in this tutorial is heavily commented, and the comments are written to help you understand the code and the logic behind it.
+
+## Read Order
+
+For easier understanding, the tutorial is written in a way that you can read the code files in the following order:
+
+#### Main Page, Login, Logout
+
+1. `service.js`
+2. `index.html`
+
+#### Authentication and User Profile
+
+3. `authentication/create-account.html`
+4. `authentication/forgot-password.html`
+5. `authentication/reset-password.html`
+6. `authentication/recover-account.html`
+7. `authentication/update-profile.html`
+8. `authentication/email-verification.html`
+9.  `authentication/change-password.html`
+10. `authentication/profile-pic.html`
+11. `authentication/remove-account.html`
+
+#### Instaclone
+
+12. `instaclone/instaclone.html`
+
+#### Chat Room
+
+13. `chatroom/chatroom.html`
+
+#### AI Image Generator
+
+14.  `image-generator/image-generator.html`

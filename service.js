@@ -15,9 +15,9 @@
 const skapi = new Skapi("ap220wfRHl9Cw2QqeFEc", "f8e16604-69e4-451c-9d90-4410f801c006", { autoLogin: true });
 
 /*
-    The following code is for disabling the form while the user is submitting.
+    The following function disableForm() is for disabling the form while the user is submitting.
     It can be useful if you want to prevent the user from submitting the form multiple times.
-    you will see this function being used in the form submission thoughout the project.
+    You will see this function being used in the form submission thoughout the project.
 */
 function disableForm(form, disabled) {
     form.querySelectorAll('input').forEach(input => {
