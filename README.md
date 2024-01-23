@@ -16,7 +16,7 @@ Currently, the values are set to:
   - Service ID: **"ap220wfRHl9Cw2QqeFEc"**
   - Owner ID: **"f8e16604-69e4-451c-9d90-4410f801c006"**
 
-You can retrieve your own service ID and owner ID from the Skapi dashboard.
+You can retrieve your own service ID and owner ID from your service dashboard.
 
 For more information, please refer to our [Skapi Documentation](https://docs.skapi.com/introduction/getting-started.html).
 
