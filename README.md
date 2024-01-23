@@ -104,8 +104,8 @@ For easier understanding, the tutorial is written in a way that you can read the
 7. `authentication/update-profile.html`
 8. `authentication/email-verification.html`
 9.  `authentication/change-password.html`
-10. `authentication/profile-pic.html`
-11. `authentication/remove-account.html`
+10. `authentication/remove-account.html`
+11. `authentication/profile-pic.html`
 
 #### Instaclone
 
