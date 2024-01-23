@@ -4,11 +4,10 @@ Welcome to the complete tutorial project for Skapi, featuring a web application 
 
 This tutorial focuses on demonstrating the use of Skapi to build a full-fledged application. The emphasis is on functionality over aesthetics.
 
-## Pre Requisites
 
-You must change the **service_id** and the **owner_id** in `service.js` file. You can retrieve the service ID and owner ID from the Skapi dashboard.
+## Demo
 
-For more information, please refer to the [Skapi Documentation](https://docs.skapi.com/introduction/getting-started.html).
+This tutorial is deployed at [https://tutorial.skapi.com](https://tutorial.skapi.com).
 
 ## Opening the Project
 
@@ -28,6 +27,18 @@ npm run start 3000
 *The number 3000 is the port number. You can change it to any port number you want.*
 
 You will be able to access the project at `http://[your remote server url]:3000`.
+
+
+## Pre Requisites
+
+You must change the **service_id** and the **owner_id** values in `service.js` file.
+Currently, the values are set to:
+  - Service ID: **"ap220wfRHl9Cw2QqeFEc"**
+  - Owner ID: **"f8e16604-69e4-451c-9d90-4410f801c006"**
+
+You can retrieve your own service ID and owner ID from the Skapi dashboard.
+
+For more information, please refer to our [Skapi Documentation](https://docs.skapi.com/introduction/getting-started.html).
 
 
 ## Key Points of This Tutorial
