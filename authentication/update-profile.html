@@ -28,9 +28,6 @@
             <h2>Update Profile</h2>
             <a href="../index.html">Back</a>
         </div>
-        <small>
-            Last login time: <span id="span_logTime"></span>
-        </small>
         <hr>
         <table>
             <tr>
@@ -196,7 +193,6 @@
         */
         user = u;
 
-        span_logTime.textContent = new Date(user.log * 1000).toLocaleString();
         input_email.value = user.email;
         input_name.value = user.name;
         input_birthdate.value = user.birthdate || "";

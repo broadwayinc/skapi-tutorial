@@ -40,6 +40,7 @@
             disableForm(this, true);
             updateButton.value = '0%';
 
+            // Following params object will be passed to the skapi.postRecord() method.
             let params = {
                 table: {
                     name: 'posts',
@@ -49,6 +50,8 @@
                     allow_multiple_reference: false // We will allow only one reference per post. This will allow us to restrict users to like only once per post.
                 },
                 progress: p => {
+                    // When the file is uploading, we will set the value of the updateButton to the progress percentage.
+                    // The p object will have the status of the upload, the current file, and the progress percentage.
                     if (p.status === 'upload' && p.currentFile) {
                         updateButton.value = `${Math.floor(p.progress)}%`;
                     }
@@ -56,15 +59,21 @@
                 tags: input_tags.value || null
             }
 
+            // Following code will upload the post to the database.
             skapi.postRecord(event, params).then(async r=>{
                 /*
                     When the post is successful, we will prepend the post to the top of the page.
                     We will call createArticleContent() function that we will declare later.
                 */
                 section_posts.prepend(await createArticleContent(r));
+
+                // We will reset the form and set the image preview to empty.
                 img_preview.src = '';
                 this.reset();
-            }).catch(err=>alert(err.message)).finally(()=>{
+            })
+            .catch(err=>alert(err.message))
+            .finally(()=>{
+                // Finally, we will set the value of the updateButton to 'Update' and enable the form.
                 updateButton.value = 'Update';
                 disableForm(this, false);
             });
@@ -187,14 +196,17 @@
         Following <section> will show the posts.
     -->
     <section id="section_posts"></section>
+
     <br>
+
     <div class="alignCenter">
         <!--
             Following <button> will allow the user to fetch more posts.
+            If there are more posts to fetch, it will enable the button.
             When the user clicks the button, it will call the getPosts() function.
             We will declare the getPosts() function and onclick event later.
         -->
-        <button id="fetchMore" disabled>Fetch More</button>
+        <button id="fetchMoreButton" disabled>Fetch More</button>
     </div>
     <style>
         /*
@@ -230,7 +242,7 @@
 </main>
 <script>
     /*
-        Following variable fetchQuery will be used to fetch the posts.
+        Following variable fetchQuery will be used as a parameter for getRecords().
     */
     let fetchQuery = {
         table: {
@@ -240,7 +252,7 @@
     };
 
     /*
-        Following variable likeId will be used to store the users like record_id.
+        Following variable likeId will be used to store the users likeed record_id.
         We will use this to save the users like status.
         This way we can show the user if they have liked the post or not, and also save unnecessary API calls.
     */
@@ -253,9 +265,10 @@
     let userInfo = {};
 
     /*
-        Following function will fetch the user information of the post uploader.
+        Following function will fetch the user information of the uploader.
     */
     async function getUserInfo(user_id) {
+        // If the user information is not fetched, we will fetch the user information by the user_id.
         if (!userInfo[user_id]) {
             let user = await skapi.getUsers({
                 searchFor: 'user_id',
@@ -280,19 +293,21 @@
         Following function will fetch posts from the database.
     */
     async function getPosts(fetchMore = true) {
-        document.getElementById('fetchMore').disabled = true;
+        // While the user is trying to fetch posts, we will disable the fetchMore button.
+        fetchMoreButton.disabled = true;
 
         /*
             In skapi.getRecords() method, we are passing the fetchQuery variable that we have declared above.
             In the second argument we are setting the fetch option to fetch 4 posts per call.
-            The ascending is set to false so that we can get the most recent posts, or the most liked posts, most commented posts... etc.
+            The ascending is set to false so that we can get the most recent posts, or the most liked posts, most commented posts depending on the query.
             When the ascending is set to false, Skapi database fetches the records in descending order.
+            The fetchMore option will allow us to fetch more posts when the user clicks the fetchMore button.
         */
         let posts = await skapi.getRecords(fetchQuery, {ascending: false, limit: 4, fetchMore});
 
         /*
-            When fetchMore is false, it means that the user is trying to fetch the posts for the first time. We will write a script for this later.
-            When the user is trying to fetch post for the first time, we will clear the #section_posts.
+            When fetchMore is false, it means the user will be fetching the posts from the start.
+            When the user is trying to fetch post from the start, we should clear the #section_posts.
             If there are no posts, we will show "No posts found." message.
         */
         if (!fetchMore) {
@@ -314,27 +329,26 @@
 
         /*
             When there are no more posts to fetch, we will disable the fetchMore button.
-            When there are more posts to fetch, we will enable the fetchMore button.
+            posts.endOfList will be true when there are no more posts to fetch.
+            When there are more posts to fetch, it will enable the fetchMore button.
             We will also set the onclick event of the fetchMore button to call the getPosts() function.
             The reason we are setting the onclick event manually is
             because there is a case where the user may want to fetch post ordered by most commented,
-            we have to call getMostCommentedPost() function instead. (we will write a script for this later)
+            which we may have to call getMostCommentedPost() function instead. (we will write a script for this later)
         */
-        document.getElementById('fetchMore').disabled = posts.endOfList;
-        document.getElementById('fetchMore').onclick = () => getPosts();
+        fetchMoreButton.disabled = posts.endOfList;
+        fetchMoreButton.onclick = () => getPosts();
     }
 
     /*
         Following function will create the html elements for the post.
     */
     async function createArticleContent(p) {
-        if (!p) {
-            return;
-        }
+        // p is the post object.
 
         /*
             Following code will get the user id of the logged in user.
-            The user variable is declared on the <script> tag above where we have checked if the user is logged in.
+            The user variable is declared on the <script> tag above where we check if the user is logged in.
             The user variable is a promise that will resolve to the user information.
         */
         let logged_user_id = (await user).user_id;
@@ -346,6 +360,9 @@
             Following variable html will compose the html string for the post.
             Notice that we are using the record_id of the post as the part of the element ID in various places.
             Will use these element id to identify the element later.
+
+            If you are using VSCode, you can use the following extension to get syntax highlighting for html strings.
+            https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
         */
         let html = /*html*/`
             <div>
@@ -378,7 +395,7 @@
             <!--
                 Following <img> will show the image of the post.
                 All the files uploaded to the database are stored in the bin.
-                We will use the getFile() method to get the authenticated image endpoint.
+                We will use the getFile() method to get the endpoint of authenticated/private image endpoint.
             -->
             <img src='${await p.bin.pic[0].getFile('endpoint')}'>
 
@@ -600,6 +617,7 @@
         We are using the skapi.postRecord() method to upload the like.
         The likes will be stored in the reference of the post.
         This way we can get the like count of a post and fetch the posts ordered by most liked.
+        Also, using the reference, we can restrict the user to like only once per post.
     */
     async function like(record_id) {
         let likeButton = document.getElementById(`strong_like-${record_id}`);
@@ -640,6 +658,7 @@
                 /*
                     For most liked posts, we will use the indexed values to get the most liked posts.
                     We can get posts ordered by referenced count by setting the reserved index name to '$referenced_count'.
+                    Argument of getPosts() is set to false so that we can fetch the most liked posts from the start.
                 */
                 fetchQuery = {
                     table: {
@@ -659,7 +678,8 @@
             case 'mostcomment':
                 /*
                     For most commented posts, we will use getMostCommentedPost() function.
-                    We will declare the getMostCommentedPost() function later.
+                    We will declare the getMostCommentedPost() function below.
+                    Argument of getMostCommentedPost() is set to false so that we can fetch the most commented posts from the start.
                 */
                 getMostCommentedPost(false);
                 break;
@@ -701,7 +721,7 @@
                 break;
             default:
                 /*
-                    For most recent posts, we can just fetch all the post under the table 'posts'.
+                    By default, we will fetch all the post under the table 'posts'.
                     The posts is Skapi database are always ordered by the time it was uploaded.
                     Since we have set the fetch option ascending to false, we will get the most recent posts.
                 */
@@ -730,7 +750,7 @@
         Following function getMostCommentedPost() will fetch the most commented posts.
     */
     async function getMostCommentedPost(fetchMore = true) {
-        document.getElementById('fetchMore').disabled = true;
+        fetchMoreButton.disabled = true;
 
         /*
             We are using skapi.getIndexes() method to get all the index information of the comment.
@@ -753,6 +773,7 @@
         );
 
         if (!fetchMore) {
+            // clear the section_posts when fetching posts with fetchMore = false.
             section_posts.innerHTML = '';
             if (commentIndex.list.length === 0) {
                 section_posts.innerHTML = 'No posts found.';
@@ -783,8 +804,8 @@
             When there are more posts to fetch, we will enable the fetchMore button.
             We will also set the onclick event of the fetchMore button to call the getMostCommentedPost() function.
         */
-        document.getElementById('fetchMore').disabled = commentIndex.endOfList;
-        document.getElementById('fetchMore').onclick = () => getMostCommentedPost();
+        fetchMoreButton.disabled = commentIndex.endOfList;
+        fetchMoreButton.onclick = () => getMostCommentedPost();
     }
     
     /*
