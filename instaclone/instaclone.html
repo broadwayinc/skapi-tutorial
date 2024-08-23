@@ -395,9 +395,8 @@
             <!--
                 Following <img> will show the image of the post.
                 All the files uploaded to the database are stored in the bin.
-                We will use the getFile() method to get the endpoint of authenticated/private image endpoint.
             -->
-            <img src='${await p.bin.pic[0].getFile('endpoint')}'>
+            <img src='${p.bin.pic[0].url}'>
 
             <div class='spaceBetween'>
                 <small>Liked: <span id="span_likedCount-${p.record_id}">${p.reference.referenced_count}</span></small>
