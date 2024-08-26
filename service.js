@@ -20,7 +20,9 @@ function disableForm(form, disabled) {
     form.querySelectorAll('input').forEach(input => {
         input.disabled = disabled;
     });
-
+    form.querySelectorAll('textarea').forEach(textarea => {
+        textarea.disabled = disabled;
+    });
     form.querySelectorAll('a').forEach(a => {
         return disabled ? a.setAttribute('disabled', '') : a.removeAttribute('disabled');
     });
