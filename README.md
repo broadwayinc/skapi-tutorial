@@ -2,9 +2,13 @@
 
 Welcome to the complete tutorial project for Skapi.
 
-The tutorial features a web application that allows users to chat, upload posts, and comment, and even provide an AI image generating service via 3rd party API service.
+The tutorial features a web application that provides:
+  - Full authentication system
+  - Realtime chat
+  - Upload posts, and comment
+  - Use an AI image generating service via 3rd party API service.
 
-This tutorial focuses on demonstrating the use of Skapi to build a full-fledged application.
+The tutorial is designed to help you understand how to build a full-fledged application using Skapi.
 
 The emphasis is on functionality over aesthetics.
 
