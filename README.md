@@ -13,6 +13,16 @@ The emphasis is on functionality over aesthetics.
 
 This tutorial is deployed at [https://tutorial.skapi.com](https://tutorial.skapi.com).
 
+## Downloading the Source Code
+
+Visit the [GitHub repository](https://github.com/broadwayinc/skapi-tutorial.git)
+
+Or clone the repository using the following command:
+
+```bash
+git clone https://github.com/broadwayinc/skapi-tutorial.git
+```
+
 ## Pre Requisites
 
 You must change the **service_id** and the **owner_id** values in `service.js` file.
