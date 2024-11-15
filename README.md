@@ -1,8 +1,12 @@
 # Skapi Full Tutorial
 
-Welcome to the complete tutorial project for Skapi, featuring a web application that allows users to chat, upload posts, and comment, and even provide an AI image generating service via 3rd party API service.
+Welcome to the complete tutorial project for Skapi.
 
-This tutorial focuses on demonstrating the use of Skapi to build a full-fledged application. The emphasis is on functionality over aesthetics.
+The tutorial features a web application that allows users to chat, upload posts, and comment, and even provide an AI image generating service via 3rd party API service.
+
+This tutorial focuses on demonstrating the use of Skapi to build a full-fledged application.
+
+The emphasis is on functionality over aesthetics.
 
 
 ## Demo
@@ -22,7 +26,9 @@ For more information, please refer to our [Skapi Documentation](https://docs.ska
 
 ## Opening the Project
 
-This project does not require any build tools. Simply open the `index.html` file in your browser, and it will just work.
+This project does not require any build tools.
+
+Simply open the `index.html` file in your browser, and it will just work.
 
 If you are on remote server, run the following command to host the project:
 
@@ -38,6 +44,7 @@ You will be able to access the project at `http://[your remote server url]:3000`
 ### Built with Pure Static HTML, CSS and JavaScript
 
 While Skapi is compatible with various frameworks, this tutorial utilizes pure static HTML, CSS, and JavaScript.
+
 It showcases how even basic static HTML can be used with Skapi to create a complete web application.
 
 The CSS stylings are intentionally minimalistic, yet the application remains fully responsive across different devices.
